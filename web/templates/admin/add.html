@@ -2,60 +2,87 @@
 {% block title %}Добавить фильм{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <h1 class="text-3xl font-bold mb-8">Добавить фильм</h1>
+<div class="max-w-3xl mx-auto slide-up">
+    <div class="mb-8">
+        <a href="/admin/" class="text-gray-400 hover:text-white transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Назад в админку
+        </a>
+        <h1 class="text-4xl font-extrabold gradient-text mt-4">Добавить фильм</h1>
+        <p class="text-gray-400 mt-1">Заполните все поля для добавления нового фильма</p>
+    </div>
 
     {% if error %}
-        <div class="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
-            {{ error }}
+        <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 flex items-start gap-3">
+            <i class="fas fa-exclamation-circle mt-1"></i>
+            <span>{{ error }}</span>
         </div>
     {% endif %}
 
-    <form action="/admin/add" method="post" class="space-y-5">
-        <div>
-            <label class="block text-sm text-gray-400 mb-1">Код фильма</label>
-            <input type="text" name="code" required
-                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"
-                   placeholder="Например: 12345">
+    <form action="/admin/add" method="post" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">
+                    <i class="fas fa-hashtag mr-2"></i>Код фильма
+                </label>
+                <input type="text" name="code" required
+                       class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all input-focus"
+                       placeholder="Например: 12345">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">
+                    <i class="fas fa-calendar-alt mr-2"></i>Год
+                </label>
+                <input type="number" name="year" required min="1900" max="2030"
+                       class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all input-focus">
+            </div>
         </div>
 
         <div>
-            <label class="block text-sm text-gray-400 mb-1">Название</label>
+            <label class="block text-sm font-medium text-gray-400 mb-2">
+                <i class="fas fa-heading mr-2"></i>Название
+            </label>
             <input type="text" name="title" required
-                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+                   class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all input-focus">
         </div>
 
         <div>
-            <label class="block text-sm text-gray-400 mb-1">Год</label>
-            <input type="number" name="year" required min="1900" max="2030"
-                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
-        </div>
-
-        <div>
-            <label class="block text-sm text-gray-400 mb-1">Ссылка на постер</label>
+            <label class="block text-sm font-medium text-gray-400 mb-2">
+                <i class="fas fa-image mr-2"></i>Ссылка на постер
+            </label>
             <input type="url" name="poster" required
-                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"
-                   placeholder="https://...">
+                   class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all input-focus"
+                   placeholder="https://example.com/poster.jpg">
         </div>
 
         <div>
-            <label class="block text-sm text-gray-400 mb-1">Описание</label>
-            <textarea name="description" required rows="5"
-                      class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"></textarea>
+            <label class="block text-sm font-medium text-gray-400 mb-2">
+                <i class="fas fa-align-left mr-2"></i>Описание
+            </label>
+            <textarea name="description" required rows="6"
+                      class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all input-focus resize-y"
+                      placeholder="Введите описание фильма..."></textarea>
         </div>
 
         <div>
-            <label class="block text-sm text-gray-400 mb-1">Рейтинг IMDb</label>
+            <label class="block text-sm font-medium text-gray-400 mb-2">
+                <i class="fas fa-star mr-2"></i>Рейтинг IMDb
+            </label>
             <input type="text" name="rating" required
-                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"
+                   class="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all input-focus"
                    placeholder="8.5">
         </div>
 
-        <div class="flex gap-4 pt-4">
-            <button type="submit" class="bg-green-600 hover:bg-green-500 px-6 py-3 rounded-xl font-medium">
-                Добавить фильм
+        <div class="flex flex-wrap gap-4 pt-4">
+            <button type="submit" class="relative group">
+                <div class="absolute inset-0 bg-green-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                <div class="relative flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-3 rounded-xl font-semibold transition-all hover:scale-105">
+                    <i class="fas fa-plus"></i>
+                    <span>Добавить фильм</span>
+                </div>
             </button>
-            <a href="/admin/" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl">
+            <a href="/admin/" class="glass-effect px-8 py-3 rounded-xl hover:bg-white/10 transition-all">
                 Отмена
             </a>
         </div>
