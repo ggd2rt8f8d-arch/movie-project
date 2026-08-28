@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ movie.title }}{% endblock %}
+{% block content %}
+<div class="flex flex-col md:flex-row gap-10">
+    <img src="{{ movie.poster }}" alt="{{ movie.title }}" class="w-full md:w-64 rounded-2xl shadow-xl object-cover">
+    <div>
+        <h1 class="text-3xl font-bold mb-2">{{ movie.title }} ({{ movie.year }})</h1>
+        <p class="text-indigo-400 text-xl mb-5">IMDb: {{ movie.rating }}</p>
+        <p class="text-gray-300 leading-relaxed mb-6">{{ movie.description }}</p>
+        <p class="text-sm text-gray-500">Код: <code class="bg-gray-800 px-2 py-1 rounded">{{ movie.code }}</code></p>
+
+        {% if is_admin %}
+        <div class="mt-8 flex gap-3">
+            <a href="/admin/edit/{{ movie.code }}" class="bg-yellow-600 hover:bg-yellow-500 px-5 py-2.5 rounded-lg">Редактировать</a>
+            <form action="/admin/delete/{{ movie.code }}" method="post" onsubmit="return confirm('Удалить фильм?')">
+                <button class="bg-red-600 hover:bg-red-500 px-5 py-2.5 rounded-lg">Удалить</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
