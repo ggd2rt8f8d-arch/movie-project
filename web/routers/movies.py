@@ -10,8 +10,9 @@ templates = Jinja2Templates(directory="templates")
 @router.get("/movie/{code}")
 async def movie_page(request: Request, code: str):
     pool = await get_pool()
-    async with pool.acquire() as conn:
-        movie = await conn.fetchrow("SELECT * FROM movies WHERE code = $1", code)
+
+    async with pool.connection() as conn:
+        movie = await conn.fetchrow("SELECT * FROM movies WHERE code = %s", (code,))
 
     if not movie:
         raise HTTPException(status_code=404, detail="Фильм не найден")
