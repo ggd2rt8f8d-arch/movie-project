@@ -27,27 +27,18 @@ oauth.register(
     client_kwargs={"scope": "openid email profile"},
 )
 
-
-# Функция для генерации code_verifier (стандарт PKCE)
 def generate_code_verifier():
     return secrets.token_urlsafe(64)
 
-# Функция для генерации code_challenge из code_verifier
 def generate_code_challenge(code_verifier):
     digest = hashlib.sha256(code_verifier.encode()).digest()
     return base64.urlsafe_b64encode(digest).rstrip(b'=').decode()
 
-
 @router.get("/google")
 async def google_login(request: Request):
     redirect_uri = f"{BASE_URL}/auth/google/callback"
-    
-    # Генерируем code_verifier
     code_verifier = generate_code_verifier()
-    
-    # Сохраняем его В URL внутри параметра state (это надежно работает с куками)
     state = quote(json.dumps({"cv": code_verifier}))
-    
     code_challenge = generate_code_challenge(code_verifier)
     
     return await oauth.google.authorize_redirect(
@@ -58,10 +49,8 @@ async def google_login(request: Request):
         code_challenge_method="S256"
     )
 
-
 @router.get("/google/callback")
 async def google_callback(request: Request):
-    # 1. Достаем code_verifier из параметра state, который вернулся от Google
     state_raw = request.query_params.get("state")
     code_verifier = None
     if state_raw:
@@ -71,18 +60,15 @@ async def google_callback(request: Request):
         except:
             code_verifier = None
 
-    # Если вдруг сессия сохранилась, берем оттуда, иначе берем из state
     if not code_verifier:
         code_verifier = request.session.get("code_verifier")
     
     if not code_verifier:
         raise HTTPException(400, "Ошибка: Не найден code_verifier")
 
-    # 2. Передаем его явно в запрос к Google
     try:
         token = await oauth.google.authorize_access_token(request, code_verifier=code_verifier)
     except Exception as e:
-        # Если ошибка, выводим её в логи, чтобы вы видели причину
         raise HTTPException(500, f"Ошибка обмена токена: {str(e)}")
         
     info = token.get("userinfo")
@@ -92,30 +78,32 @@ async def google_callback(request: Request):
 
     pool = await get_pool()
     async with pool.connection() as conn:
-        # Проверяем, существует ли пользователь
-        user = await conn.fetchrow("SELECT * FROM users WHERE google_id = %s", (info["sub"],))
+        # Используем методы psycopg: fetchone вместо fetchrow
+        user = await (await conn.execute("SELECT * FROM users WHERE google_id = %s", (info["sub"],))).fetchone()
         
         if not user:
-            user = await conn.fetchrow("""
+            # INSERT ... RETURNING * -> fetchone
+            user = await (await conn.execute("""
                 INSERT INTO users (google_id, email, full_name, avatar_url)
                 VALUES (%s, %s, %s, %s)
                 RETURNING *
-            """, (info["sub"], info.get("email"), info.get("name"), info.get("picture")))
+            """, (info["sub"], info.get("email"), info.get("name"), info.get("picture")))).fetchone()
         else:
             await conn.execute("""
                 UPDATE users SET email=%s, full_name=%s, avatar_url=%s WHERE id=%s
             """, (info.get("email"), info.get("name"), info.get("picture"), user["id"]))
-            user = await conn.fetchrow("SELECT * FROM users WHERE id = %s", (user["id"],))
+            user = await (await conn.execute("SELECT * FROM users WHERE id = %s", (user["id"],))).fetchone()
 
+    # Так как psycopg возвращает Record (а не dict), проверьте доступ по ключам или индексам.
+    # Обычно user["id"] работает, но если нет, используйте user[0]
     request.session["user"] = {
-        "id": user["id"],
-        "full_name": user["full_name"],
-        "avatar_url": user["avatar_url"],
-        "is_admin": user["is_admin"],
+        "id": user["id"] if "id" in user.keys() else user[0], 
+        "full_name": user["full_name"] if "full_name" in user.keys() else user[2],
+        "avatar_url": user["avatar_url"] if "avatar_url" in user.keys() else user[3],
+        "is_admin": user["is_admin"] if "is_admin" in user.keys() else user[4],
         "provider": "google"
     }
     return RedirectResponse("/", status_code=303)
-
 
 @router.get("/telegram/callback")
 async def telegram_callback(request: Request):
@@ -140,32 +128,33 @@ async def telegram_callback(request: Request):
 
     pool = await get_pool()
     async with pool.connection() as conn:
-        if await conn.fetchval("SELECT 1 FROM admins WHERE user_id = %s", (tg_id,)):
+        # Проверяем старую таблицу (fetchone)
+        admin_check = await (await conn.execute("SELECT 1 FROM admins WHERE user_id = %s", (tg_id,))).fetchone()
+        if admin_check:
             is_admin = True
 
-        user = await conn.fetchrow("SELECT * FROM users WHERE telegram_id = %s", (tg_id,))
+        user = await (await conn.execute("SELECT * FROM users WHERE telegram_id = %s", (tg_id,))).fetchone()
         if not user:
-            user = await conn.fetchrow("""
+            user = await (await conn.execute("""
                 INSERT INTO users (telegram_id, full_name, avatar_url, is_admin)
                 VALUES (%s, %s, %s, %s)
                 RETURNING *
-            """, (tg_id, full_name, avatar, is_admin))
+            """, (tg_id, full_name, avatar, is_admin))).fetchone()
         else:
             await conn.execute("""
                 UPDATE users SET full_name=%s, avatar_url=%s, is_admin = is_admin OR %s
                 WHERE telegram_id=%s
             """, (full_name, avatar, is_admin, tg_id))
-            user = await conn.fetchrow("SELECT * FROM users WHERE telegram_id = %s", (tg_id,))
+            user = await (await conn.execute("SELECT * FROM users WHERE telegram_id = %s", (tg_id,))).fetchone()
 
     request.session["user"] = {
-        "id": user["id"],
-        "full_name": user["full_name"],
-        "avatar_url": user["avatar_url"],
-        "is_admin": user["is_admin"],
+        "id": user["id"] if "id" in user.keys() else user[0],
+        "full_name": user["full_name"] if "full_name" in user.keys() else user[2],
+        "avatar_url": user["avatar_url"] if "avatar_url" in user.keys() else user[3],
+        "is_admin": user["is_admin"] if "is_admin" in user.keys() else user[4],
         "provider": "telegram"
     }
     return RedirectResponse("/", status_code=303)
-
 
 @router.get("/logout")
 async def logout(request: Request):
