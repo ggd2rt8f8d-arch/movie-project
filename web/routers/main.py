@@ -20,8 +20,9 @@ async def index(request: Request):
 async def search(request: Request, code: str = Form(...)):
     code = code.strip()
     pool = await get_pool()
-    async with pool.acquire() as conn:
-        exists = await conn.fetchval("SELECT 1 FROM movies WHERE code = $1", code)
+
+    async with pool.connection() as conn:
+        exists = await conn.fetchval("SELECT 1 FROM movies WHERE code = %s", (code,))
 
     if exists:
         return RedirectResponse(f"/movie/{code}", status_code=303)
