@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto text-center">
+    <h1 class="text-4xl font-bold mb-8">Поиск фильма по коду</h1>
+    <form action="/search" method="post" class="flex gap-3">
+        <input name="code" type="text" placeholder="Введите код" required
+               class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+        <button class="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-xl font-medium">Найти</button>
+    </form>
+    {% if error %}
+        <p class="mt-5 text-red-400">{{ error }}</p>
+    {% endif %}
+</div>
+{% endblock %}
