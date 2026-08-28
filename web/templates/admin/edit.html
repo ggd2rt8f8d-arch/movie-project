@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Редактировать — {{ movie.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold mb-2">Редактировать фильм</h1>
+    <p class="text-gray-400 mb-8">Код: <code class="bg-gray-800 px-2 py-1 rounded">{{ movie.code }}</code></p>
+
+    <form action="/admin/edit/{{ movie.code }}" method="post" class="space-y-5">
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Название</label>
+            <input type="text" name="title" required value="{{ movie.title }}"
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Год</label>
+            <input type="number" name="year" required min="1900" max="2030" value="{{ movie.year }}"
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Ссылка на постер</label>
+            <input type="url" name="poster" required value="{{ movie.poster }}"
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Описание</label>
+            <textarea name="description" required rows="5"
+                      class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">{{ movie.description }}</textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Рейтинг IMDb</label>
+            <input type="text" name="rating" required value="{{ movie.rating }}"
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-xl font-medium">
+                Сохранить изменения
+            </button>
+            <a href="/movie/{{ movie.code }}" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl">
+                Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
