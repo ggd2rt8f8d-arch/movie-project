@@ -1,24 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Админка{% endblock %}
+{% block title %}Админ-панель{% endblock %}
 {% block content %}
-<div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold">Админ-панель</h1>
-    <a href="/admin/add" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-lg">+ Добавить фильм</a>
-</div>
-
-<div class="space-y-3">
-    {% for m in movies %}
-    <div class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex justify-between items-center">
-        <a href="/movie/{{ m.code }}" class="hover:text-indigo-400">{{ m.code }} — {{ m.title }} ({{ m.year }})</a>
-        <div class="flex gap-4 text-sm">
-            <a href="/admin/edit/{{ m.code }}" class="text-yellow-400 hover:text-yellow-300">Изменить</a>
-            <form action="/admin/delete/{{ m.code }}" method="post" onsubmit="return confirm('Удалить?')">
-                <button class="text-red-400 hover:text-red-300">Удалить</button>
-            </form>
+<div class="slide-up">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+            <h1 class="text-4xl font-extrabold gradient-text">Админ-панель</h1>
+            <p class="text-gray-400 mt-1">Управление фильмами в базе данных</p>
         </div>
+        <a href="/admin/add" class="relative group">
+            <div class="absolute inset-0 bg-green-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+            <div class="relative flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105">
+                <i class="fas fa-plus"></i>
+                <span>Добавить фильм</span>
+            </div>
+        </a>
     </div>
+
+    {% if movies %}
+        <div class="grid gap-3">
+            {% for m in movies %}
+                <div class="group glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-300">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <a href="/movie/{{ m.code }}" class="flex-1 group-hover:text-indigo-400 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-lg text-sm font-mono">
+                                    {{ m.code }}
+                                </span>
+                                <span class="font-medium">{{ m.title }}</span>
+                                <span class="text-gray-500 text-sm">({{ m.year }})</span>
+                            </div>
+                        </a>
+                        <div class="flex items-center gap-2 text-sm">
+                            <a href="/admin/edit/{{ m.code }}" 
+                               class="px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 rounded-lg transition-all">
+                                <i class="fas fa-pen sm:mr-1"></i>
+                                <span class="hidden sm:inline">Изменить</span>
+                            </a>
+                            <form action="/admin/delete/{{ m.code }}" method="post" 
+                                  onsubmit="return confirm('Удалить фильм «{{ m.title }}»?')">
+                                <button class="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-lg transition-all">
+                                    <i class="fas fa-trash sm:mr-1"></i>
+                                    <span class="hidden sm:inline">Удалить</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-6 p-4 glass-effect rounded-xl flex justify-between items-center">
+            <span class="text-gray-400">Всего фильмов: <strong class="text-white">{{ movies|length }}</strong></span>
+            <div class="flex gap-2">
+                <button class="px-4 py-2 glass-effect rounded-lg hover:bg-white/10 transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="px-4 py-2 bg-indigo-500/20 rounded-lg">1</button>
+                <button class="px-4 py-2 glass-effect rounded-lg hover:bg-white/10 transition-all">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
     {% else %}
-        <p class="text-gray-500">Фильмов пока нет</p>
-    {% endfor %}
+        <div class="text-center py-20">
+            <i class="fas fa-film text-6xl text-gray-600 mb-4"></i>
+            <h3 class="text-2xl font-semibold text-gray-400">Фильмов пока нет</h3>
+            <p class="text-gray-500 mt-2">Начните с добавления первого фильма</p>
+            <a href="/admin/add" class="inline-block mt-6 text-indigo-400 hover:text-indigo-300 transition-colors">
+                <i class="fas fa-plus mr-2"></i>
+                Добавить фильм
+            </a>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
