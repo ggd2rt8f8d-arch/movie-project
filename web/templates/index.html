@@ -1,14 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-lg mx-auto text-center">
-    <h1 class="text-4xl font-bold mb-8">Поиск фильма по коду</h1>
-    <form action="/search" method="post" class="flex gap-3">
-        <input name="code" type="text" placeholder="Введите код" required
-               class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
-        <button class="bg-indigo-600 hover:bg-indigo-500 px-6 py-3 rounded-xl font-medium">Найти</button>
+<div class="max-w-4xl mx-auto text-center slide-up">
+    <div class="mb-12">
+        <h1 class="text-5xl sm:text-6xl font-extrabold mb-6">
+            <span class="gradient-text">Поиск фильма</span>
+            <br>
+            <span class="text-white">по уникальному коду</span>
+        </h1>
+        <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+            Введите код фильма и мгновенно получите всю информацию о нем
+        </p>
+    </div>
+
+    <form action="/search" method="post" class="max-w-2xl mx-auto">
+        <div class="relative group">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+            <div class="relative flex items-center bg-gray-900/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+                <i class="fas fa-search text-gray-500 pl-5 text-lg"></i>
+                <input name="code" type="text" placeholder="Введите код фильма" required
+                       class="flex-1 bg-transparent px-4 py-4 sm:py-5 text-lg outline-none placeholder-gray-500">
+                <button class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 px-6 sm:px-8 py-4 sm:py-5 font-semibold transition-all hover:scale-105 active:scale-95">
+                    <span class="flex items-center gap-2">
+                        <span>Найти</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
     </form>
+
     {% if error %}
-        <p class="mt-5 text-red-400">{{ error }}</p>
+        <div class="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 slide-up">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            {{ error }}
+        </div>
     {% endif %}
+
+    <div class="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+        <div class="p-4 glass-effect rounded-xl text-center">
+            <i class="fas fa-film text-indigo-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-400">Быстрый поиск</p>
+        </div>
+        <div class="p-4 glass-effect rounded-xl text-center">
+            <i class="fas fa-star text-yellow-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-400">Рейтинги IMDb</p>
+        </div>
+        <div class="p-4 glass-effect rounded-xl text-center">
+            <i class="fas fa-image text-purple-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-400">Качественные постеры</p>
+        </div>
+        <div class="p-4 glass-effect rounded-xl text-center">
+            <i class="fas fa-shield-alt text-green-400 text-2xl mb-2"></i>
+            <p class="text-sm text-gray-400">Безопасно</p>
+        </div>
+    </div>
 </div>
 {% endblock %}
