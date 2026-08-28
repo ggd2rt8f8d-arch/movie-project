@@ -5,33 +5,199 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MovieCode{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+            }
+            to {
+                box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+            }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .movie-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .movie-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8, #6366f1, #4f46e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        
+        .input-focus:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+        }
+    </style>
 </head>
-<body class="bg-gray-950 text-white min-h-screen">
-<nav class="bg-gray-900 border-b border-gray-800">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-        <a href="/" class="text-xl font-bold text-indigo-400">MovieCode</a>
-        <div class="flex items-center gap-4">
-            {% if user %}
-                <span class="text-sm text-gray-300">{{ user.full_name }}</span>
-                {% if user.is_admin %}
-                    <a href="/admin/" class="text-sm bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg">Админка</a>
-                {% endif %}
-                <a href="/auth/logout" class="text-sm text-red-400 hover:text-red-300">Выйти</a>
-            {% else %}
-                <a href="/auth/google" class="text-sm bg-white text-gray-900 px-3 py-1.5 rounded-lg font-medium">Войти через Google</a>
-                <script async src="https://telegram.org/js/telegram-widget.js?22"
-                    data-telegram-login="ВАШ_БОТ_БЕЗ_@"
-                    data-size="medium"
-                    data-radius="8"
-                    data-auth-url="{{ request.base_url }}auth/telegram/callback"
-                    data-request-access="write"></script>
-            {% endif %}
-        </div>
+<body>
+    <!-- Анимированный фон с частицами -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse delay-2000"></div>
     </div>
-</nav>
 
-<main class="max-w-5xl mx-auto px-4 py-10">
-    {% block content %}{% endblock %}
-</main>
+    <!-- Навигация -->
+    <nav class="relative z-10 bg-black/30 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <a href="/" class="flex items-center gap-3 group">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-indigo-500 rounded-lg blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                        <div class="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg p-2">
+                            <i class="fas fa-film text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <span class="text-2xl font-bold gradient-text">MovieCode</span>
+                </a>
+                
+                <div class="flex items-center gap-3 sm:gap-4">
+                    {% if user %}
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2 px-3 py-2 glass-effect rounded-lg">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                                    {{ user.full_name[0]|upper }}
+                                </div>
+                                <span class="text-sm text-gray-300 hidden sm:block">{{ user.full_name }}</span>
+                            </div>
+                            {% if user.is_admin %}
+                                <a href="/admin/" class="relative group">
+                                    <div class="absolute inset-0 bg-indigo-500 rounded-lg blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                                    <div class="relative bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 rounded-lg text-sm font-medium hover:scale-105 transition-transform">
+                                        <i class="fas fa-crown mr-2"></i>Админка
+                                    </div>
+                                </a>
+                            {% endif %}
+                            <a href="/auth/logout" class="text-gray-400 hover:text-red-400 transition-colors">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center gap-3">
+                            <script async src="https://telegram.org/js/telegram-widget.js?22"
+                                data-telegram-login="MovieCodeBot"
+                                data-size="medium"
+                                data-radius="12"
+                                data-auth-url="{{ request.base_url }}auth/telegram/callback"
+                                data-request-access="write"
+                                class="hidden sm:block">
+                            </script>
+                            <a href="/auth/google" class="relative group">
+                                <div class="absolute inset-0 bg-white/10 rounded-lg blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                                <div class="relative flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105">
+                                    <i class="fab fa-google text-lg"></i>
+                                    <span class="hidden sm:inline">Войти</span>
+                                </div>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 mt-16 border-t border-white/5 bg-black/20 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+                <div class="flex items-center gap-4">
+                    <span>© 2026 MovieCode</span>
+                    <span class="w-1 h-1 rounded-full bg-gray-700"></span>
+                    <span>Сделано с ❤️</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a href="#" class="hover:text-indigo-400 transition-colors">О проекте</a>
+                    <a href="#" class="hover:text-indigo-400 transition-colors">Помощь</a>
+                    <a href="#" class="hover:text-indigo-400 transition-colors">Контакты</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
