@@ -1,13 +1,21 @@
-import asyncpg
+import psycopg
+from psycopg.rows import dict_row
+from psycopg_pool import AsyncConnectionPool
 from config import DATABASE_URL
 
-pool = None
+pool: AsyncConnectionPool = None
 
 async def init_db():
     global pool
-    pool = await asyncpg.create_pool(DATABASE_URL)
+    pool = AsyncConnectionPool(
+        conninfo=DATABASE_URL,
+        min_size=1,
+        max_size=10,
+        kwargs={"row_factory": dict_row}
+    )
+    await pool.open()
 
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -35,6 +43,7 @@ async def init_db():
                 user_id BIGINT PRIMARY KEY
             )
         """)
+
 
 async def get_pool():
     return pool
