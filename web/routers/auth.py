@@ -3,6 +3,8 @@ import hmac
 import time
 import secrets
 import base64
+import json
+from urllib.parse import quote, unquote
 
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Request, HTTPException
@@ -40,16 +42,18 @@ def generate_code_challenge(code_verifier):
 async def google_login(request: Request):
     redirect_uri = f"{BASE_URL}/auth/google/callback"
     
-    # Генерируем и сохраняем code_verifier в сессию
+    # Генерируем code_verifier
     code_verifier = generate_code_verifier()
-    request.session["code_verifier"] = code_verifier
     
-    # Передаем code_challenge в Google
+    # Сохраняем его В URL внутри параметра state (это надежно работает с куками)
+    state = quote(json.dumps({"cv": code_verifier}))
+    
     code_challenge = generate_code_challenge(code_verifier)
     
     return await oauth.google.authorize_redirect(
         request, 
         redirect_uri,
+        state=state,
         code_challenge=code_challenge,
         code_challenge_method="S256"
     )
@@ -57,8 +61,30 @@ async def google_login(request: Request):
 
 @router.get("/google/callback")
 async def google_callback(request: Request):
-    # Получаем токен (Authlib сам подставит code_verifier из вашей сессии через Starlette, если версия 1.2+)
-    token = await oauth.google.authorize_access_token(request)
+    # 1. Достаем code_verifier из параметра state, который вернулся от Google
+    state_raw = request.query_params.get("state")
+    code_verifier = None
+    if state_raw:
+        try:
+            state_data = json.loads(unquote(state_raw))
+            code_verifier = state_data.get("cv")
+        except:
+            code_verifier = None
+
+    # Если вдруг сессия сохранилась, берем оттуда, иначе берем из state
+    if not code_verifier:
+        code_verifier = request.session.get("code_verifier")
+    
+    if not code_verifier:
+        raise HTTPException(400, "Ошибка: Не найден code_verifier")
+
+    # 2. Передаем его явно в запрос к Google
+    try:
+        token = await oauth.google.authorize_access_token(request, code_verifier=code_verifier)
+    except Exception as e:
+        # Если ошибка, выводим её в логи, чтобы вы видели причину
+        raise HTTPException(500, f"Ошибка обмена токена: {str(e)}")
+        
     info = token.get("userinfo")
     
     if not info:
