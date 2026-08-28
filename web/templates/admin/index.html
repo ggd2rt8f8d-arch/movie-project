@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Админка{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Админ-панель</h1>
+    <a href="/admin/add" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-lg">+ Добавить фильм</a>
+</div>
+
+<div class="space-y-3">
+    {% for m in movies %}
+    <div class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex justify-between items-center">
+        <a href="/movie/{{ m.code }}" class="hover:text-indigo-400">{{ m.code }} — {{ m.title }} ({{ m.year }})</a>
+        <div class="flex gap-4 text-sm">
+            <a href="/admin/edit/{{ m.code }}" class="text-yellow-400 hover:text-yellow-300">Изменить</a>
+            <form action="/admin/delete/{{ m.code }}" method="post" onsubmit="return confirm('Удалить?')">
+                <button class="text-red-400 hover:text-red-300">Удалить</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+        <p class="text-gray-500">Фильмов пока нет</p>
+    {% endfor %}
+</div>
+{% endblock %}
