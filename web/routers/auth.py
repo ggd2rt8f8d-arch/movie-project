@@ -38,18 +38,19 @@ async def google_callback(request: Request):
         raise HTTPException(400, "Ошибка Google")
 
     pool = await get_pool()
-    async with pool.acquire() as conn:
-        user = await conn.fetchrow("SELECT * FROM users WHERE google_id = $1", info["sub"])
+    async with pool.connection() as conn:
+        user = await conn.fetchrow("SELECT * FROM users WHERE google_id = %s", (info["sub"],))
         if not user:
             user = await conn.fetchrow("""
                 INSERT INTO users (google_id, email, full_name, avatar_url)
-                VALUES ($1, $2, $3, $4) RETURNING *
-            """, info["sub"], info.get("email"), info.get("name"), info.get("picture"))
+                VALUES (%s, %s, %s, %s)
+                RETURNING *
+            """, (info["sub"], info.get("email"), info.get("name"), info.get("picture")))
         else:
             await conn.execute("""
-                UPDATE users SET email=$1, full_name=$2, avatar_url=$3 WHERE id=$4
-            """, info.get("email"), info.get("name"), info.get("picture"), user["id"])
-            user = await conn.fetchrow("SELECT * FROM users WHERE id = $1", user["id"])
+                UPDATE users SET email=%s, full_name=%s, avatar_url=%s WHERE id=%s
+            """, (info.get("email"), info.get("name"), info.get("picture"), user["id"]))
+            user = await conn.fetchrow("SELECT * FROM users WHERE id = %s", (user["id"],))
 
     request.session["user"] = {
         "id": user["id"],
@@ -83,23 +84,24 @@ async def telegram_callback(request: Request):
     is_admin = tg_id in ADMIN_TELEGRAM_IDS
 
     pool = await get_pool()
-    async with pool.acquire() as conn:
-        # Подтягиваем админку из старой таблицы бота
-        if await conn.fetchval("SELECT 1 FROM admins WHERE user_id = $1", tg_id):
+    async with pool.connection() as conn:
+        # Проверяем старую таблицу админов бота
+        if await conn.fetchval("SELECT 1 FROM admins WHERE user_id = %s", (tg_id,)):
             is_admin = True
 
-        user = await conn.fetchrow("SELECT * FROM users WHERE telegram_id = $1", tg_id)
+        user = await conn.fetchrow("SELECT * FROM users WHERE telegram_id = %s", (tg_id,))
         if not user:
             user = await conn.fetchrow("""
                 INSERT INTO users (telegram_id, full_name, avatar_url, is_admin)
-                VALUES ($1, $2, $3, $4) RETURNING *
-            """, tg_id, full_name, avatar, is_admin)
+                VALUES (%s, %s, %s, %s)
+                RETURNING *
+            """, (tg_id, full_name, avatar, is_admin))
         else:
             await conn.execute("""
-                UPDATE users SET full_name=$1, avatar_url=$2, is_admin = is_admin OR $3
-                WHERE telegram_id=$4
-            """, full_name, avatar, is_admin, tg_id)
-            user = await conn.fetchrow("SELECT * FROM users WHERE telegram_id = $1", tg_id)
+                UPDATE users SET full_name=%s, avatar_url=%s, is_admin = is_admin OR %s
+                WHERE telegram_id=%s
+            """, (full_name, avatar, is_admin, tg_id))
+            user = await conn.fetchrow("SELECT * FROM users WHERE telegram_id = %s", (tg_id,))
 
     request.session["user"] = {
         "id": user["id"],
