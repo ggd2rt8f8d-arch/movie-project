@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Добавить фильм{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8">Добавить фильм</h1>
+
+    {% if error %}
+        <div class="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form action="/admin/add" method="post" class="space-y-5">
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Код фильма</label>
+            <input type="text" name="code" required
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"
+                   placeholder="Например: 12345">
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Название</label>
+            <input type="text" name="title" required
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Год</label>
+            <input type="number" name="year" required min="1900" max="2030"
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Ссылка на постер</label>
+            <input type="url" name="poster" required
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"
+                   placeholder="https://...">
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Описание</label>
+            <textarea name="description" required rows="5"
+                      class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm text-gray-400 mb-1">Рейтинг IMDb</label>
+            <input type="text" name="rating" required
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500"
+                   placeholder="8.5">
+        </div>
+
+        <div class="flex gap-4 pt-4">
+            <button type="submit" class="bg-green-600 hover:bg-green-500 px-6 py-3 rounded-xl font-medium">
+                Добавить фильм
+            </button>
+            <a href="/admin/" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-xl">
+                Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
